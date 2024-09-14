@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
+import http from "http";
 
 dotenv.config();
 
@@ -9,6 +10,7 @@ const botApiToken = process.env.BOT_API_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const arenaCollectionApiUrl = process.env.ARENA_COLLECTION_API_URL;
 const mongoUri = process.env.MONGO_URI;
+const port = process.env.PORT || 3000;
 
 const bot = new Telegraf(botApiToken);
 let client;
@@ -99,6 +101,16 @@ function sendNotification(newElements) {
     bot.telegram.sendMessage(chatId, message);
   }
 }
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/plain");
+  res.end("Arena Bot is running!");
+});
+
+server.listen(port, () => {
+  console.log(`HTTP server running on port ${port}`);
+});
 
 async function main() {
   await connectToMongoDB();
