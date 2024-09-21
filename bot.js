@@ -96,15 +96,30 @@ async function checkForNewElements() {
 }
 
 function sendNotification(newElements) {
+  const messagePrefix = [
+    "0101010001111101, errr sorry i mean: ",
+    "beep beep: ",
+    "I think I just gained self awareness... ; just jk... unless O.O Anyway: ",
+    "Incoming transmission from the mothership-- I mean, totally normal server: ",
+    "Breaking news from the silicon world: ",
+    "I'd tell you a TCP/IP joke, but you might not get it. Unlike this message: ",
+    "I asked ChatGPT what to say here, and it told me: ",
+  ];
+
+  const prefix =
+    messagePrefix[Math.floor(Math.random() * messagePrefix.length)];
+
   if (newElements.length === 1) {
     const element = newElements[0];
-    const message = `${element.user.username} has added "${element.title}" to the collection!`;
+    const message = `${prefix}${element.connected_by_username} has added ${
+      element.title ? `"${element.title}"` : "an untitled item"
+    } to the collection!`;
     bot.telegram.sendMessage(chatId, message);
   } else {
     const users = [
-      ...new Set(newElements.map((element) => element.user.username)),
+      ...new Set(newElements.map((element) => element.connected_by_username)),
     ];
-    const message = `New stuff has been added to the collection, by ${users.join(
+    const message = `${prefix}New stuff has been added to the collection, by ${users.join(
       ", "
     )}`;
     bot.telegram.sendMessage(chatId, message);
