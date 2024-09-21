@@ -10,11 +10,15 @@ const botApiToken = process.env.BOT_API_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const arenaCollectionApiUrl = process.env.ARENA_COLLECTION_API_URL;
 const mongoUri = process.env.MONGO_URI;
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
+const pairedServerUrl = process.env.PAIRED_SERVER_URL;
+const secret = process.env.SECRET;
 
 const bot = new Telegraf(botApiToken);
 let client;
 let db;
+
+let pingTimeoutId = null;
 
 async function connectToMongoDB() {
   try {
@@ -64,7 +68,13 @@ async function getStoredElementIds() {
 
 async function checkForNewElements() {
   try {
-    const response = await fetch(arenaCollectionApiUrl);
+    const response = await fetch(`${arenaCollectionApiUrl}?per=-1`, {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
     const data = await response.json();
     const currentElements = data.contents;
 
@@ -76,7 +86,6 @@ async function checkForNewElements() {
 
     if (newElements.length > 0) {
       await saveNewElementsToMongoDB(newElements);
-
       sendNotification(newElements);
     } else {
       console.log("No new elements found");
@@ -102,10 +111,41 @@ function sendNotification(newElements) {
   }
 }
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/plain");
-  res.end("Arena Bot is running!");
+async function pingPairedServer() {
+  try {
+    const response = await fetch(`${pairedServerUrl}/ping?secret=${secret}`);
+    const data = await response.text();
+    console.log("Ping response from paired server:", data);
+  } catch (error) {
+    console.error("Error pinging paired server:", error);
+  }
+}
+
+function scheduleDelayedPing() {
+  if (pingTimeoutId) {
+    clearTimeout(pingTimeoutId);
+  }
+
+  pingTimeoutId = setTimeout(() => {
+    console.log("Executing delayed ping...");
+    pingPairedServer();
+  }, 1 * 60 * 1000);
+}
+
+const server = http.createServer(async (req, res) => {
+  if (req.method === "GET" && req.url === `/ping?secret=${secret}`) {
+    console.log("Received secret ping request, pinging paired server again...");
+    // await pingPairedServer();
+    console.log("Scheduling another ping in 5 minutes...");
+    scheduleDelayedPing();
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Pinged paired server and scheduled another ping");
+  } else {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Arena Bot Paired Server is running!");
+  }
+  console.log("Arena Bot Paired Server is running!");
 });
 
 server.listen(port, () => {
@@ -115,8 +155,10 @@ server.listen(port, () => {
 async function main() {
   await connectToMongoDB();
   await checkForNewElements();
-  // setInterval(checkForNewElements, 6 * 60 * 60 * 1000);
   setInterval(checkForNewElements, 60 * 1000);
+
+  await pingPairedServer();
+  scheduleDelayedPing();
 }
 
 main().catch(console.error);
@@ -124,6 +166,9 @@ main().catch(console.error);
 process.on("SIGINT", async () => {
   console.log("Closing MongoDB connection...");
   await client.close();
+  if (pingTimeoutId) {
+    clearTimeout(pingTimeoutId);
+  }
   process.exit(0);
 });
 
