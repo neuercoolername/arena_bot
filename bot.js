@@ -8,7 +8,7 @@ dotenv.config();
 
 const botApiToken = process.env.BOT_API_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
-const arenaCollectionApiUrl = process.env.ARENA_COLLECTION_API_URL;
+const arenaCollectionApiUrls = process.env.ARENA_COLLECTION_API_URL.split(",");
 const mongoUri = process.env.MONGO_URI;
 const port = process.env.PORT || 3001;
 const pairedServerUrl = process.env.PAIRED_SERVER_URL;
@@ -68,21 +68,26 @@ async function getStoredElementIds() {
 
 async function checkForNewElements() {
   try {
-    const response = await fetch(`${arenaCollectionApiUrl}?per=-1`, {
-      method: "GET",
-      headers: {
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
-      },
-    });
-    const data = await response.json();
-    const currentElements = data.contents;
-
     const storedElementIds = await getStoredElementIds();
+    let newElements = [];
 
-    const newElements = currentElements.filter(
-      (element) => !storedElementIds.has(element.id)
-    );
+    for (const url of arenaCollectionApiUrls) {
+      const response = await fetch(`${url}?per=-1`, {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+      const data = await response.json();
+      const currentElements = data.contents;
+
+      const newElementsForUrl = currentElements.filter(
+        (element) => !storedElementIds.has(element.id)
+      );
+
+      newElements = newElements.concat(newElementsForUrl);
+    }
 
     if (newElements.length > 0) {
       await saveNewElementsToMongoDB(newElements);
