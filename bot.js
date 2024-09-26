@@ -129,7 +129,7 @@ function sendNotification(newElements) {
     const message = `${prefix}New stuff has been added to the collection, by ${users.join(
       ", "
     )}`;
-    bot.telegram.sendMessage(chatId, message);
+    bot.telegram.sendMessage(chatId, message, { disable_notification: true });
   }
 }
 
