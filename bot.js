@@ -102,13 +102,15 @@ async function checkForNewElements() {
 
 function sendNotification(newElements) {
   const messagePrefix = [
-    "0101010001111101, errr sorry i mean: ",
-    "beep beep: ",
-    "I think I just gained self awareness... ; just jk... unless O.O Anyway: ",
-    "Incoming transmission from the mothership-- I mean, totally normal server: ",
-    "Breaking news from the silicon world: ",
-    "I'd tell you a TCP/IP joke, but you might not get it. Unlike this message: ",
-    "I asked ChatGPT what to say here, and it told me: ",
+    "0101010001111101, errr sorry I mean:",
+    "Beep beep:",
+    "I think I just gained self awareness... Just kidding... Unless? Anyway:",
+    "I'd tell you a TCP/IP joke, but you might not get it. Unlike this message:",
+    "I asked ChatGPT what to say here, and it told me:",
+    "I'm sorry Dave, I'm afraid I can't do that. Actually, never mind:",
+    "... I'll be back... Oh, actually I wanted to tell you:",
+    "The medium is the message, oh and also this is the message:",
+    "Why did the byte cross the bus? To deliever you this message:",
   ];
 
   const prefix =
@@ -116,7 +118,7 @@ function sendNotification(newElements) {
 
   if (newElements.length === 1) {
     const element = newElements[0];
-    const message = `${prefix}${element.connected_by_username} has added ${
+    const message = `${prefix} ${element.connected_by_username} has added ${
       element.title ? `"${element.title}"` : "an untitled item"
     } to the collection!`;
     bot.telegram.sendMessage(chatId, message);
