@@ -121,9 +121,7 @@ function sendNotification(newElements) {
     const message = `${prefix} ${element.connected_by_username} has added ${
       element.title ? `"${element.title}"` : "an untitled item"
     } to the collection!`;
-    bot.command("send", (ctx) => {
-      ctx.telegram.sendMessage(chatId, message, { disable_notification: true });
-    });
+    bot.telegram.sendMessage(chatId, message, { disable_notification: true });
   } else {
     const users = [
       ...new Set(newElements.map((element) => element.connected_by_username)),
@@ -131,8 +129,8 @@ function sendNotification(newElements) {
     const message = `${prefix}New stuff has been added to the collection, by ${users.join(
       ", "
     )}`;
-    bot.command("send", (ctx) => {
-      ctx.telegram.sendMessage(chatId, message, { disable_notification: true });
+    bot.telegram.sendMessage(chatId, message, {
+      extra: { disable_notification: true },
     });
   }
 }
