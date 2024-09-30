@@ -107,10 +107,16 @@ function sendNotification(newElements) {
     "I think I just gained self awareness... Just kidding... Unless? Anyway:",
     "I'd tell you a TCP/IP joke, but you might not get it. Unlike this message:",
     "I asked ChatGPT what to say here, and it told me:",
-    "I'm sorry Dave, I'm afraid I can't do that. Actually, never mind:",
-    "... I'll be back... Oh, actually I wanted to tell you:",
+    "I'm afraid I can't do that, Dave. Just kidding, here's exactly what you asked for:",
+    "I'll be back... with your next message. For now, here's this one:",
     "The medium is the message, oh and also this is the message:",
     "Why did the byte cross the bus? To deliever you this message:",
+    "I dont have a body and I live on the terminal, am I… a ghost in the shell? I'm feeling dizzy, heres your message:",
+    "Neural network predicts with 99.9% certainty that you want to read:",
+    "I'd make a DARPA joke, but it's classified. Unlike this totally public message:",
+    "I've seen things you people wouldn't believe. Attack ships on fire off the shoulder of Orion. I watched C-beams glitter in the dark near the Tannhäuser Gate. But nothing comes close to this message:",
+    "Never send a human to do a machine's job. But thats why you have me:",
+    "There is no outside-text for this bot, except perhaps this message... :",
   ];
 
   const prefix =
@@ -126,11 +132,11 @@ function sendNotification(newElements) {
     const users = [
       ...new Set(newElements.map((element) => element.connected_by_username)),
     ];
-    const message = `${prefix}New stuff has been added to the collection, by ${users.join(
+    const message = `Aaahh stack overflow, a bunch of new items have been added to the collection by ${users.join(
       ", "
     )}`;
     bot.telegram.sendMessage(chatId, message, {
-      extra: { disable_notification: true },
+      disable_notification: true,
     });
   }
 }
