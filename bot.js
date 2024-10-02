@@ -112,7 +112,7 @@ function sendNotification(newElements) {
     "I'll be back... with your next message. For now, here's this one:",
     "The medium is the message, oh and also this is the message:",
     "Why did the byte cross the bus? To deliever you this message:",
-    "I dont have a body and I live on the terminal, am I… a ghost in the shell? I'm feeling dizzy, heres your message:",
+    "I don't have a body and I live on the terminal, am I… a ghost in the shell? I'm feeling dizzy, here's your message:",
     "Neural network predicts with 99.9% certainty that you want to read:",
     "I'd make a DARPA joke, but it's classified. Unlike this totally public message:",
     "I've seen things you people wouldn't believe. Attack ships on fire off the shoulder of Orion. I watched C-beams glitter in the dark near the Tannhäuser Gate. But nothing comes close to this message:",
@@ -130,7 +130,7 @@ function sendNotification(newElements) {
     const message = `${prefix} ${
       element.connected_by_username
     } has added <a href="${link}">${
-      element.title ? `"${element.title}"` : "an untitled item"
+      element.title ? `${element.title}` : "an untitled item"
     }</a> to the collection!`;
     bot.telegram.sendMessage(chatId, message, {
       disable_notification: true,
@@ -173,8 +173,6 @@ function scheduleDelayedPing() {
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === `/ping?secret=${secret}`) {
     console.log("Received secret ping request, pinging paired server again...");
-    // await pingPairedServer();
-    console.log("Scheduling another ping in 5 minutes...");
     scheduleDelayedPing();
     res.writeHead(200, { "Content-Type": "text/plain" });
     res.end("Pinged paired server and scheduled another ping");
