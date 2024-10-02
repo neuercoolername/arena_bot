@@ -13,6 +13,7 @@ const mongoUri = process.env.MONGO_URI;
 const port = process.env.PORT || 3001;
 const pairedServerUrl = process.env.PAIRED_SERVER_URL;
 const secret = process.env.SECRET;
+const environment = process.env.ENVIRONMENT;
 
 const bot = new Telegraf(botApiToken);
 let client;
@@ -124,10 +125,17 @@ function sendNotification(newElements) {
 
   if (newElements.length === 1) {
     const element = newElements[0];
-    const message = `${prefix} ${element.connected_by_username} has added ${
+    const id = element.id;
+    const link = `https://www.are.na/block/${id}`;
+    const message = `${prefix} ${
+      element.connected_by_username
+    } has added <a href="${link}">${
       element.title ? `"${element.title}"` : "an untitled item"
-    } to the collection!`;
-    bot.telegram.sendMessage(chatId, message, { disable_notification: true });
+    }</a> to the collection!`;
+    bot.telegram.sendMessage(chatId, message, {
+      disable_notification: true,
+      parse_mode: "HTML",
+    });
   } else {
     const users = [
       ...new Set(newElements.map((element) => element.connected_by_username)),
@@ -187,8 +195,10 @@ async function main() {
   await checkForNewElements();
   setInterval(checkForNewElements, 60 * 1000);
 
-  await pingPairedServer();
-  scheduleDelayedPing();
+  if (environment === "PROD") {
+    await pingPairedServer();
+    scheduleDelayedPing();
+  }
 }
 
 main().catch(console.error);
